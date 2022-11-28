@@ -1,5 +1,5 @@
 {
-    "name": "My card",
-    "render_readme": true,
-    "filename": "my-custom-card.js"
+    "name": "GyverLamp card",
+    "render_readme": false,
+    "filename": "gyverlamp-card.js"
 }
