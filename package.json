@@ -1,6 +1,6 @@
 {
   "name": "gyverlamp-card",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "GyverLamp Card for Gunner firmware",
   "main": "dist/gyverlamp-card.js",
   "scripts": {
@@ -31,7 +31,7 @@
     ],
     "verbose": false,
     "setupFilesAfterEnv": [
-      "<rootDir>/dist/my-custom-card.js"
+      "<rootDir>/dist/gyverlamp-card.js"
     ],
     "globals": {
       "ts-jest": {
