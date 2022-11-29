@@ -110,6 +110,8 @@ export class GyverlampCard extends LitElement {
     render(): TemplateResult {
         let hass: HomeAssistant = this.hass;
         let entity: string = this.entity;
+        let state = hass.states[entity].state;
+        let mode = this.mode;
 
         const lightParams = {
             state: hass.states[entity].state,
@@ -177,7 +179,7 @@ export class GyverlampCard extends LitElement {
             <ha-card>
                 <div class="card-content">
                     <div>
-                        <div class="entity-row state-${lightParams.state} mode-${this.mode}">
+                        <div class="entity-row state-${state} mode-${mode}">
                             ${iconHtml}
                             ${nameHtml}
                             ${settingsRow}
