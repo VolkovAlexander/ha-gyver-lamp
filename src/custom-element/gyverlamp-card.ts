@@ -101,16 +101,16 @@ export class GyverlampCard extends LitElement {
         let state = hass.states[entity].state;
         let mode = this.mode;
 
-        console.log(hass.states[entity]);
+        let rgbColors = hass.states[entity].attributes.rgb_color || [0,0,0];
 
         const lightParams = {
             state: hass.states[entity].state,
             name: this.name || hass.states[entity].attributes.friendly_name,
             effect: hass.states[entity].state === 'on' ? hass.states[entity].attributes.effect : 'Нет доступа',
             effects: hass.states[entity].attributes.effect_list || [],
-            brightness: hass.states[entity].attributes.brightness,
-            speed: hass.states[entity].attributes.rgb_color[0],
-            scale: hass.states[entity].attributes.rgb_color[1],
+            brightness: hass.states[entity].attributes.brightness || 0,
+            speed: rgbColors[0],
+            scale: rgbColors[1],
         }
 
         const unavailableIcon = lightParams.state === 'unavailable' ? html`<div class="unavailable-icon">${icon(faExclamation).node}</div>` : html``;
