@@ -31,7 +31,7 @@ export function handleEndClick(instance: GyverlampCard, shortPressFunction: Func
 
 export function toggleDisplayMode(instance: GyverlampCard) {
     let hass = instance.hass;
-    let state = 'on'; //hass.states[instance.entity].state;
+    let state = hass.states[instance.entity].state;
 
     if (state === 'on') {
         instance.mode = instance.mode === 'normal' ? 'settings' : 'normal';

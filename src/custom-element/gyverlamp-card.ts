@@ -112,7 +112,7 @@ export class GyverlampCard extends LitElement {
         let entity: string = this.entity;
 
         const lightParams = {
-            state: 'on', //hass.states[entity].state,
+            state: hass.states[entity].state,
             name: this.name || hass.states[entity].attributes.friendly_name,
             effect: hass.states[entity].state === 'unavailable' ? 'Нет доступа' : hass.states[entity].attributes.effect,
             effects: hass.states[entity].attributes.effect_list || [],
