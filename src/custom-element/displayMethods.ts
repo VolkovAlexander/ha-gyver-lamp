@@ -39,8 +39,8 @@ export function toggleDisplayMode(instance: GyverlampCard) {
     }
 }
 
-export function toggleSettingsField(instance: GyverlampCard) {
-    instance.settingsField = instance.settingsField === 'BRI' ? 'SPD' : 'BRI';
+export function updateSettingsField(instance: GyverlampCard, value: string) {
+    instance.settingsField = value;
 }
 
 export function eventsMainIcon(instance: GyverlampCard) {
@@ -101,12 +101,17 @@ export function eventsSlider(instance: GyverlampCard, type: string) {
             });
             slider.setAttribute('data-listened', 'true');
         }
-
-        let icon = shadowRoot.querySelector('#settings' + type);
+    }
+}
+export function eventsSettingsIcon(instance: GyverlampCard) {
+    let shadowRoot = instance.shadowRoot;
+    if (shadowRoot) {
+        let icon = shadowRoot.querySelector('#selectSettingsField');
         if (icon && !icon.getAttribute('data-listened')) {
-            icon.addEventListener('click', () => {
-                toggleSettingsField(instance);
-            })
+            icon.addEventListener('change', (ev) => {
+                // @ts-ignore
+                updateSettingsField(instance, ev.target.value);
+            });
             icon.setAttribute('data-listened', 'true');
         }
     }

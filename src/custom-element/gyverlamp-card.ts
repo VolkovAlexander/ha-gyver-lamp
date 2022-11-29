@@ -4,14 +4,14 @@ import { property } from "lit/decorators";
 import { ICardConfig } from "../types";
 
 import { icon } from '@fortawesome/fontawesome-svg-core';
-import { faLightbulb, faSun } from '@fortawesome/free-regular-svg-icons';
-import { faExclamation, faGaugeHigh } from '@fortawesome/free-solid-svg-icons';
+import { faLightbulb } from '@fortawesome/free-regular-svg-icons';
+import { faExclamation, faBolt, faWater, faFire } from '@fortawesome/free-solid-svg-icons';
 
 import '../components/range-slider.js';
 
 import cardStyles from "./card.css";
 
-import { eventsMainIcon, eventsSelect, eventsSlider } from "./displayMethods";
+import {eventsMainIcon, eventsSelect, eventsSettingsIcon, eventsSlider} from "./displayMethods";
 
 /**
  * Main card class definition
@@ -78,6 +78,8 @@ export class GyverlampCard extends LitElement {
         eventsSelect(this);
         eventsSlider(this, 'Bri');
         eventsSlider(this, 'Spd');
+        eventsSlider(this, 'Sca');
+        eventsSettingsIcon(this);
     }
 
     protected updated(_changedProperties: PropertyValues) {
@@ -86,6 +88,8 @@ export class GyverlampCard extends LitElement {
         eventsSelect(this);
         eventsSlider(this, 'Bri');
         eventsSlider(this, 'Spd');
+        eventsSlider(this, 'Sca');
+        eventsSettingsIcon(this);
     }
 
     /**
@@ -125,6 +129,29 @@ export class GyverlampCard extends LitElement {
         `;
 
         let settingsRow = html``;
+        let settingsFaIcon = icon(faFire).node;
+        switch(this.settingsField) {
+            case 'BRI':
+                settingsFaIcon = icon(faFire).node;
+                break;
+            case 'SPD':
+                settingsFaIcon = icon(faBolt).node;
+                break;
+            case 'SCA':
+                settingsFaIcon = icon(faWater).node;
+                break;
+        }
+
+        let settingsIcon =  this.mode === 'normal' ? html`` : html`
+            <div class="settings">
+                ${settingsFaIcon}
+                <select id="selectSettingsField" class="effect-select">
+                    <option value="BRI">Яркость</option>
+                    <option value="SPD">Скорость</option>
+                    <option value="SCA">Масштаб</option>
+                </select>
+            </div>
+        `;
 
         if (this.mode === 'settings' && this.settingsField === 'BRI') {
             settingsRow = html`
@@ -135,9 +162,6 @@ export class GyverlampCard extends LitElement {
                             .max=${255}
                             .value=${lightParams.brightness}
                     ></range-slider>
-                    <div id="settingsBri" class="settings">
-                        ${icon(faSun).node}
-                    </div>
                 </div>
             `;
         }
@@ -151,9 +175,19 @@ export class GyverlampCard extends LitElement {
                             .max=${255}
                             .value=${lightParams.color_temp}
                     ></range-slider>
-                    <div id="settingsSpd" class="settings">
-                        ${icon(faGaugeHigh).node}
-                    </div>
+                </div>
+            `;
+        }
+
+        if (this.mode === 'settings' && this.settingsField === 'SCA') {
+            settingsRow = html`
+                <div class="settings-row">
+                    <range-slider
+                            id="sliderRangeSca"
+                            .min=${1}
+                            .max=${255}
+                            .value=${lightParams.color_temp}
+                    ></range-slider>
                 </div>
             `;
         }
@@ -166,6 +200,7 @@ export class GyverlampCard extends LitElement {
                             ${iconHtml}
                             ${nameHtml}
                             ${settingsRow}
+                            ${settingsIcon}
                         <div>
                     </div>
                 </div>
