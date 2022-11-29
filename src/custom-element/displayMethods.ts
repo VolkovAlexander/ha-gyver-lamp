@@ -1,5 +1,5 @@
 import {GyverlampCard} from "./gyverlamp-card";
-import {toggleState, updateBrightness, updateColorTemp, updateEffect} from "./lightMethods";
+import {toggleState, updateBrightness, updateEffect, updateScale, updateSpeed} from "./lightMethods";
 
 export function isIOS() {
     return [
@@ -93,7 +93,11 @@ export function eventsSlider(instance: GyverlampCard, type: string) {
                         break;
                     case 'Spd':
                         // @ts-ignore
-                        updateColorTemp(instance, ev.detail.value);
+                        updateSpeed(instance, ev.detail.value);
+                        break;
+                    case 'Sca':
+                        // @ts-ignore
+                        updateScale(instance, ev.detail.value);
                         break;
                     default:
                         break;

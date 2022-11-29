@@ -101,13 +101,16 @@ export class GyverlampCard extends LitElement {
         let state = hass.states[entity].state;
         let mode = this.mode;
 
+        console.log(hass.states[entity]);
+
         const lightParams = {
             state: hass.states[entity].state,
             name: this.name || hass.states[entity].attributes.friendly_name,
             effect: hass.states[entity].state === 'on' ? hass.states[entity].attributes.effect : 'Нет доступа',
             effects: hass.states[entity].attributes.effect_list || [],
             brightness: hass.states[entity].attributes.brightness,
-            color_temp: hass.states[entity].attributes.color_temp,
+            speed: hass.states[entity].attributes.rgb_color[0],
+            scale: hass.states[entity].attributes.rgb_color[1],
         }
 
         const unavailableIcon = lightParams.state === 'unavailable' ? html`<div class="unavailable-icon">${icon(faExclamation).node}</div>` : html``;
@@ -173,7 +176,7 @@ export class GyverlampCard extends LitElement {
                             id="sliderRangeSpd"
                             .min=${1}
                             .max=${255}
-                            .value=${lightParams.color_temp}
+                            .value=${lightParams.speed}
                     ></range-slider>
                 </div>
             `;
@@ -186,7 +189,7 @@ export class GyverlampCard extends LitElement {
                             id="sliderRangeSca"
                             .min=${1}
                             .max=${255}
-                            .value=${lightParams.color_temp}
+                            .value=${lightParams.scale}
                     ></range-slider>
                 </div>
             `;

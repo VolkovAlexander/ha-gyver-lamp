@@ -29,12 +29,29 @@ export function updateBrightness(instance: GyverlampCard, brightness: string) {
     });
 }
 
-export function updateColorTemp(instance: GyverlampCard, color_temp: string) {
+export function updateSpeed(instance: GyverlampCard, speed: string) {
     const hass = instance.hass;
     const entity = instance.entity;
 
+    let rgb = hass.states[entity].attributes.rgb_color;
+    rgb[0] = speed;
+
     callService(hass, entity, 'light', 'turn_on', {
-        'color_temp': color_temp
+        'rgb_color': rgb
+    }).then((r) => {
+        console.log('updateColorTemp'); console.log(r);
+    });
+}
+
+export function updateScale(instance: GyverlampCard, scale: string) {
+    const hass = instance.hass;
+    const entity = instance.entity;
+
+    let rgb = hass.states[entity].attributes.rgb_color;
+    rgb[1] = scale;
+
+    callService(hass, entity, 'light', 'turn_on', {
+        'rgb_color': rgb
     }).then((r) => {
         console.log('updateColorTemp'); console.log(r);
     });
