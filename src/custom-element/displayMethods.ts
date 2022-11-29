@@ -44,15 +44,11 @@ export function toggleSettingsField(instance: GyverlampCard) {
 }
 
 export function eventsMainIcon(instance: GyverlampCard) {
-    if (instance.handleEvents.mainIcon) {
-        return;
-    }
-
     let shadowRoot = instance.shadowRoot;
     if (shadowRoot) {
         let mainIcon = shadowRoot.querySelector('#mainIcon');
 
-        if (mainIcon) {
+        if (mainIcon && !mainIcon.getAttribute('data-listened')) {
             mainIcon.addEventListener(isIOS() ? 'touchstart' : 'mousedown', () => {
                 handleStartClick(instance)
             });
@@ -66,37 +62,28 @@ export function eventsMainIcon(instance: GyverlampCard) {
                     }
                 )
             });
-            instance.handleEvents.mainIcon = true;
+            mainIcon.setAttribute('data-listened', 'true');
         }
     }
 }
 export function eventsSelect(instance: GyverlampCard) {
-    if (instance.handleEvents.select) {
-        return;
-    }
-
     let shadowRoot = instance.shadowRoot;
     if (shadowRoot) {
         let effectSelect = shadowRoot.querySelector('#effectSelect');
-        if (effectSelect) {
+        if (effectSelect && !effectSelect.getAttribute('data-listened')) {
             effectSelect.addEventListener('change', (ev) => {
                 // @ts-ignore
                 updateEffect(this, ev.target.value);
             });
-            instance.handleEvents.select = true;
+            effectSelect.setAttribute('data-listened', 'true');
         }
     }
 }
 export function eventsSlider(instance: GyverlampCard, type: string) {
-    // @ts-ignore
-    if (instance.handleEvents['slider' + type]) {
-        return;
-    }
-
     let shadowRoot = instance.shadowRoot;
     if (shadowRoot) {
         let slider = shadowRoot.querySelector('#sliderRange' + type);
-        if (slider) {
+        if (slider && !slider.getAttribute('data-listened')) {
             slider.addEventListener('slider-update', (ev) => {
                 // @ts-ignore
                 switch (type) {
@@ -112,33 +99,15 @@ export function eventsSlider(instance: GyverlampCard, type: string) {
                         break;
                 }
             });
-
-            let icon = shadowRoot.querySelector('#settings' + type);
-            if (icon) {
-                icon.addEventListener('click', () => {
-                    toggleSettingsField(instance);
-                })
-            }
-
-            // @ts-ignore
-            instance.handleEvents['slider' + type] = true;
+            slider.setAttribute('data-listened', 'true');
         }
-    }
-}
-export function eventsSettingsIcon(instance: GyverlampCard) {
-    if (instance.handleEvents.settingsIcon) {
-        return;
-    }
 
-    let shadowRoot = instance.shadowRoot;
-    if (shadowRoot) {
-        let settingsIcon = shadowRoot.querySelector('#settingsIcon');
-
-        if (settingsIcon) {
-            settingsIcon.addEventListener('click', () => {
+        let icon = shadowRoot.querySelector('#settings' + type);
+        if (icon && !icon.getAttribute('data-listened')) {
+            icon.addEventListener('click', () => {
                 toggleSettingsField(instance);
-            });
-            instance.handleEvents.settingsIcon = true;
+            })
+            icon.setAttribute('data-listened', 'true');
         }
     }
 }

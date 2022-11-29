@@ -37,14 +37,6 @@ export class GyverlampCard extends LitElement {
     // @ts-ignore
     _hass: HomeAssistant;
 
-    handleEvents = {
-        mainIcon: false,
-        settingsIcon: false,
-        select: false,
-        sliderBri: false,
-        sliderSpd: false
-    }
-
     /**
      * CSS for the card
      */
