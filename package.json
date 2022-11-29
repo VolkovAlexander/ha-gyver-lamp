@@ -1,6 +1,6 @@
 {
   "name": "gyverlamp-card",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "GyverLamp Card for Gunner firmware",
   "main": "dist/gyverlamp-card.js",
   "scripts": {

@@ -1,5 +1,5 @@
 import { HomeAssistant } from "../ha-types";
-import {html, css, LitElement, CSSResultGroup, TemplateResult, PropertyValues} from "lit";
+import { html, css, LitElement, CSSResultGroup, TemplateResult, PropertyValues } from "lit";
 import { property } from "lit/decorators";
 import { ICardConfig } from "../types";
 
@@ -11,15 +11,7 @@ import '../components/range-slider.js';
 
 import cardStyles from "./card.css";
 
-import {toggleState, updateBrightness, updateColorTemp, updateEffect} from "./lightMethods";
-import {
-    eventsMainIcon, eventsSelect, eventsSettingsIcon, eventsSlider,
-    handleEndClick,
-    handleStartClick,
-    isIOS,
-    toggleDisplayMode,
-    toggleSettingsField
-} from "./displayMethods";
+import { eventsMainIcon, eventsSelect, eventsSlider } from "./displayMethods";
 
 /**
  * Main card class definition
