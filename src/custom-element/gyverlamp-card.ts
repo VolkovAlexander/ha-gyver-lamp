@@ -1,15 +1,25 @@
 import { HomeAssistant } from "../ha-types";
-import { html, css, LitElement, CSSResultGroup, TemplateResult } from "lit";
+import {html, css, LitElement, CSSResultGroup, TemplateResult, PropertyValues} from "lit";
 import { property } from "lit/decorators";
 import { ICardConfig } from "../types";
 
 import { icon } from '@fortawesome/fontawesome-svg-core';
 import { faLightbulb, faSun } from '@fortawesome/free-regular-svg-icons';
-import { faChevronDown, faChevronUp, faExclamation, faGaugeHigh } from '@fortawesome/free-solid-svg-icons';
+import { faExclamation, faGaugeHigh } from '@fortawesome/free-solid-svg-icons';
 
 import '../components/range-slider.js';
 
 import cardStyles from "./card.css";
+
+import {toggleState, updateBrightness, updateColorTemp, updateEffect} from "./lightMethods";
+import {
+    eventsMainIcon, eventsSelect, eventsSettingsIcon, eventsSlider,
+    handleEndClick,
+    handleStartClick,
+    isIOS,
+    toggleDisplayMode,
+    toggleSettingsField
+} from "./displayMethods";
 
 /**
  * Main card class definition
@@ -24,16 +34,24 @@ export class GyverlampCard extends LitElement {
     };
 
     @property({ attribute: false })
-    private mode: string = "normal";
+    mode: string = "normal";
 
     @property({ attribute: false })
-    private settingsField: string = "BRI";
+    settingsField: string = "BRI";
 
-    private entity: string = "";
+    entity: string = "";
+    pressStart: Number = 0;
 
     // @ts-ignore
-    protected _hass: HomeAssistant = {};
-    private longPressStart: Number = 0;
+    _hass: HomeAssistant;
+
+    handleEvents = {
+        mainIcon: false,
+        settingsIcon: false,
+        select: false,
+        sliderBri: false,
+        sliderSpd: false
+    }
 
     /**
      * CSS for the card
@@ -58,6 +76,10 @@ export class GyverlampCard extends LitElement {
         this.states = hass.states[this.entity];
     }
 
+    get hass() {
+        return this._hass;
+    }
+
     /**
      * Called every time when entity config is updated
      * @param config Card configuration (yaml converted to JSON)
@@ -67,174 +89,95 @@ export class GyverlampCard extends LitElement {
         this.name = config.name || "";
     }
 
-    private toggleDisplayMode() {
-        this.mode = this.mode === 'normal' ? 'settings' : 'normal';
-        this.settingsField = 'BRI';
+    firstUpdated() {
+        eventsMainIcon(this);
+        eventsSelect(this);
+        eventsSlider(this, 'Bri');
+        eventsSlider(this, 'Spd');
     }
 
-    private toggleSettingsField() {
-        this.settingsField = this.settingsField === 'BRI' ? 'SPD' : 'BRI';
-    }
-
-    private handleMainIconClick()
-    {
-        console.log(this.mode);
-        if (this.mode === 'settings') {
-            this.toggleDisplayMode();
-        } else {
-            this.toggleState();
-        }
-    }
-
-    private toggleState() {
-        this._hass.callService("light", "toggle", {
-            entity_id: this.entity
-        }).then(r => {
-        });
-    }
-    private handleAttrChange(ev: CustomEvent) {
-        let data = {
-            entity_id: this.entity
-        }
-
-        let fieldName = ev.detail.field;
-        // @ts-ignore
-        data[fieldName] = ev.detail['value'];
-        this._hass.callService("light", "turn_on", data).then(r => {
-        });
-    }
-    private handleEffectChange(effect: String) {
-        // @ts-ignore
-        let curBri = this.states.attributes.brightness;
-
-        let data = {
-            entity_id: this.entity,
-            brightness: curBri,
-            effect: effect
-        };
-        this._hass.callService("light", "turn_on", data).then(r => {
-        });
-    }
-
-    private handleMouseDown() {
-        this.longPressStart = Date.now();
-    }
-    private handleMouseUp(shortClickFunction: Function, longClickFunction: Function) {
-        let latency = parseInt(String(Date.now())) - parseInt(String(this.longPressStart));
-        if (latency >= 500 && typeof longClickFunction === 'function') {
-            longClickFunction();
-        } else {
-            shortClickFunction();
-        }
-    }
-
-    protected isIOS() {
-        return [
-                'iPad Simulator',
-                'iPhone Simulator',
-                'iPod Simulator',
-                'iPad',
-                'iPhone',
-                'iPod'
-            ].includes(navigator.platform)
-            // iPad on iOS 13 detection
-            || (navigator.userAgent.includes("Mac") && "ontouchend" in document)
+    protected updated(_changedProperties: PropertyValues) {
+        super.updated(_changedProperties);
+        eventsMainIcon(this);
+        eventsSelect(this);
+        eventsSlider(this, 'Bri');
+        eventsSlider(this, 'Spd');
     }
 
     /**
      * Renders the card when the update is requested (when any of the properties are changed)
      */
     render(): TemplateResult {
-        let self = this;
+        let hass: HomeAssistant = this.hass;
+        let entity: string = this.entity;
 
-        let hass: HomeAssistant = this._hass;
+        const lightParams = {
+            state: 'on', //hass.states[entity].state,
+            name: this.name || hass.states[entity].attributes.friendly_name,
+            effect: hass.states[entity].state === 'unavailable' ? 'Нет доступа' : hass.states[entity].attributes.effect,
+            effects: hass.states[entity].attributes.effect_list || [],
+            brightness: hass.states[entity].attributes.brightness,
+            color_temp: hass.states[entity].attributes.color_temp,
+        }
 
-        let states = hass.states[this.entity];
-        let mode = this.mode;
-        let settingsField = this.settingsField;
-
-        let state = states.state;
-        let brightness = parseInt(states.attributes.brightness);
-        let color_temp = parseInt(states.attributes.color_temp);
-        let EFF = states.attributes.effect;
-        let EFFS = states.attributes.effect_list;
-
-        let displayName = this.name || states.attributes.friendly_name;
-        let displayState = state === 'unavailable' ? 'Нет доступа' : (states.attributes.effect || 'Не задано');
-
-        let mainIcon = icon(faLightbulb).node;
-        let settingsIcon = settingsField === 'BRI' ? icon(faSun).node : icon(faGaugeHigh).node;
+        const unavailableIcon = lightParams.state === 'unavailable' ? html`<div class="unavailable-icon">${icon(faExclamation).node}</div>` : html``;
 
         let iconHtml = html`
-            <div class="icon" 
-                    @mousedown="${this.handleMouseDown}"
-                    @mouseup="${() => this.handleMouseUp(
-                    function() { return self.isIOS() ? {} : self.handleMainIconClick()},
-                    function() { return self.isIOS() ? {} : (state === 'on' ? self.toggleDisplayMode() : self.handleMainIconClick())}
-                    )}"
-                    @touchstart="${this.handleMouseDown}"
-                    @touchend="${() => this.handleMouseUp(
-                    function() { return !self.isIOS() ? {} : self.handleMainIconClick()},
-                    function() { return !self.isIOS() ? {} : (state === 'on' ? self.toggleDisplayMode() : self.handleMainIconClick())}
-                    )}"
-            >
-                <div class="unavailable-icon">
-                    ${icon(faExclamation).node}
-                </div>
-                ${mainIcon}
+            <div id="mainIcon" class="icon">
+                ${unavailableIcon}
+                ${icon(faLightbulb).node}
             </div>
         `;
 
-        let nameHtml = this.mode === 'settings' ? html`` : html`
+        const nameHtml = this.mode === 'settings' ? html`` : html`
             <div class="name truncate">
-                ${displayName}
-                <small class="secondary">${displayState}</small>
-                <select class="effect-select" name="lamp_effect"
-                        @change="${(ev: { target: { value: String; }; }) => this.handleEffectChange(ev.target.value)}"
-                >
-                    ${EFFS.map((option: String) => html`
-                                        <option value="${option}" ?selected=${EFF === option}>${option}</option>
-                                    `)}
+                ${lightParams.name}
+                <small class="secondary">${lightParams.effect}</small>
+                <select id="effectSelect" class="effect-select" name="lamp_effect" >
+                    ${lightParams.effects.map((option: String) => html`<option value="${option}" ?selected=${lightParams.effect === option}>${option}</option>`)}
                 </select>
             </div>
         `;
 
-        let settingsRow = this.mode === 'normal' ? html`` : (
-            this.settingsField === 'BRI' ? html`
+        let settingsRow = html``;
+
+        if (this.mode === 'settings' && this.settingsField === 'BRI') {
+            settingsRow = html`
                 <div class="settings-row">
                     <range-slider
+                            id="sliderRangeBri"
                             .min=${1}
                             .max=${255}
-                            .value=${brightness}
-                            field="brightness"
-                            @slider-value-changed="${(ev: CustomEvent) => this.handleAttrChange(ev)}"
+                            .value=${lightParams.brightness}
                     ></range-slider>
-                    <div class="settings" @click="${() => this.toggleSettingsField()}">
+                    <div id="settingsBri" class="settings">
                         ${icon(faSun).node}
                     </div>
                 </div>
-            ` : html`
+            `;
+        }
+
+        if (this.mode === 'settings' && this.settingsField === 'SPD') {
+            settingsRow = html`
                 <div class="settings-row">
                     <range-slider
-                            class="settings-speed"
+                            id="sliderRangeSpd"
                             .min=${1}
                             .max=${255}
-                            .value=${color_temp}
-                            field="color_temp"
-                            @slider-value-changed="${(ev: CustomEvent) => this.handleAttrChange(ev)}"
+                            .value=${lightParams.color_temp}
                     ></range-slider>
-                    <div class="settings" @click="${() => this.toggleSettingsField()}">
+                    <div id="settingsSpd" class="settings">
                         ${icon(faGaugeHigh).node}
                     </div>
                 </div>
-            `
-        )
+            `;
+        }
 
         return html`
             <ha-card>
                 <div class="card-content">
                     <div>
-                        <div class="entity-row state-${state} mode-${mode}">
+                        <div class="entity-row state-${lightParams.state} mode-${this.mode}">
                             ${iconHtml}
                             ${nameHtml}
                             ${settingsRow}

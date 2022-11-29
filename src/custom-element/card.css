@@ -93,7 +93,7 @@
 }
 
 .entity-row.state-unavailable .unavailable-icon {
-    display: block;
+    visibility: visible;
 }
 
 .entity-row .settings {

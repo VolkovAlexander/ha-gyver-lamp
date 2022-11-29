@@ -71,6 +71,7 @@ export interface ToggleActionConfig extends BaseActionConfig {
 
   export interface Window {
     // Custom panel entry point url
+    pressStart: number;
     customPanelJS: string;
     ShadyCSS: {
       nativeCss: boolean;

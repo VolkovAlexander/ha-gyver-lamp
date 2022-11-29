@@ -225,11 +225,11 @@ class RangeSlider extends LitElement {
     changedValue() {
         const { value } = this._input;
         const options = {
-            detail: {value: value, field: this.field},
+            detail: {value: value},
             bubbles: true,
             composed: true
         };
-        this.dispatchEvent(new CustomEvent('slider-value-changed', options));
+        this.dispatchEvent(new CustomEvent('slider-update', options));
     }
 
     /**
@@ -250,8 +250,6 @@ class RangeSlider extends LitElement {
 
         // Dispatch the change event for range-slider. (For event handlers.)
         this.dispatchEvent(new Event('change'));
-
-        console.log('here!');
     }
 }
 
