@@ -74,6 +74,7 @@ export function eventsSelect(instance: GyverlampCard) {
             effectSelect.addEventListener('change', (ev) => {
                 // @ts-ignore
                 updateEffect(instance, ev.target.value);
+                
             });
             effectSelect.setAttribute('data-listened', 'true');
         }
