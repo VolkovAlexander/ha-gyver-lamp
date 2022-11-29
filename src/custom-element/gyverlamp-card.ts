@@ -123,7 +123,6 @@ export class GyverlampCard extends LitElement {
         }
 
         const unavailableIcon = lightParams.state === 'unavailable' ? html`<div class="unavailable-icon">${icon(faExclamation).node}</div>` : html``;
-
         let iconHtml = html`
             <div id="mainIcon" class="icon">
                 ${unavailableIcon}
