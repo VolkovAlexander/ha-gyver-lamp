@@ -113,6 +113,8 @@ export class GyverlampCard extends LitElement {
         let state = hass.states[entity].state;
         let mode = this.mode;
 
+        console.log(hass.states[entity]);
+
         const lightParams = {
             state: hass.states[entity].state,
             name: this.name || hass.states[entity].attributes.friendly_name,
